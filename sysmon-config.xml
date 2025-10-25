@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Sysmon schemaversion="4.82">
+  <HashAlgorithms>sha256</HashAlgorithms>
+
+  <EventFiltering>
+
+    <!-- Process Creation -->
+    <ProcessCreate onmatch="include">
+      <Image condition="contains">WindowsSandbox.exe</Image>
+      <Image condition="contains">wsb.exe</Image>
+      <Image condition="contains">WindowsSandboxClient.exe</Image>
+      <Image condition="contains">WindowsSandboxServer.exe</Image>
+      <Image condition="contains">vmcompute.exe</Image>
+      <Image condition="contains">vmmem</Image>
+    </ProcessCreate>
+
+    <!-- Network Connections -->
+    <NetworkConnect onmatch="include">
+      <Image condition="contains">WindowsSandbox</Image>
+    </NetworkConnect>
+
+    <!-- File Creation -->
+    <FileCreate onmatch="include">
+      <TargetFilename condition="end with">.wsb</TargetFilename>
+      <TargetFilename condition="end with">.vhdx</TargetFilename>
+    </FileCreate>
+
+    <!-- Registry Key Access -->
+    <RegistryEvent onmatch="include">
+      <TargetObject condition="contains">Sandbox</TargetObject>
+    </RegistryEvent>
+
+    <!-- Image Load -->
+    <ImageLoad onmatch="include">
+      <ImageLoaded condition="contains">WindowsSandbox</ImageLoaded>
+    </ImageLoad>
+
+  </EventFiltering>
+</Sysmon>
