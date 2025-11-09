@@ -205,7 +205,6 @@ echo Sandevistan startup running...
 type "%~dp0$firstFile" > "%USERPROFILE%\Desktop\sandbox_honey_preview.txt"
 regedit /s "%~dp0\bait_setting.reg" > "%USERPROFILE%\Desktop\sandbox_reg_import_log.txt" 2>&1
 timeout /t 2 > nul
-echo Done. Check Desktop for files.
 "@
   Set-Content -LiteralPath $startupBat -Value $bat -Encoding ASCII
   $manifest.artifacts += @{path=$startupBat; sha256=(Get-FileHash $startupBat -Algorithm SHA256).Hash; action="run"}
