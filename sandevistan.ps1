@@ -26,7 +26,6 @@ param(
   [switch]$VerboseMode
 )
 
-
 function Write-Log([string]$m){ Write-Host "[Sandevistan] $m" }
 
 function Check-Sysmon {
@@ -141,14 +140,26 @@ function Make-Sysmon-Config {
     try {
         $config | Out-File -FilePath $OutFile -Encoding utf8 -Force
         Write-Log "Sysmon config created successfully at: $OutFile"
-        return @{ success = $true; schema = $schemaVersion; path = $OutFile }
+        return @{
+            success        = $true
+            schema         = $schemaVersion
+            path           = $OutFile
+            sysmon_version = $sysmon.version
+            sysmon_path    = $sysmon.path
+        }
     }
     catch {
         Write-Log "Error writing Sysmon config: $_"
-        return @{ success = $false; error = $_.Exception.Message }
+        return @{
+            success        = $false
+            error          = $_.Exception.Message
+            schema         = $schemaVersion
+            path           = $OutFile
+            sysmon_version = $sysmon.version
+            sysmon_path    = $sysmon.path
+        }
     }
 }
-
 
 function Generate-WSB {
   param($OutDir, $CountFiles, $Profile)
@@ -163,9 +174,9 @@ function Generate-WSB {
   function RandString($n){ -join ((48..57)+(65..90)+(97..122)|Get-Random -Count $n|%{[char]$_}) }
 
   $manifest = [ordered]@{
-    run_id = ("sandevistan-{0}" -f (Get-Date -Format "yyyyMMddTHHmmss"))
-    created = (Get-Date).ToString("o")
-    profile = $Profile
+    run_id    = ("sandevistan-{0}" -f (Get-Date -Format "yyyyMMddTHHmmss"))
+    created   = (Get-Date).ToString("o")
+    profile   = $Profile
     artifacts = @()
   }
 
@@ -228,7 +239,24 @@ timeout /t 2 > nul
   Set-Content -LiteralPath $wsbPath -Value $wsbXml -Encoding UTF8
   $manifest.wsb = $wsbPath
 
-  $manifestJson = $manifest | ConvertTo-Json -Depth 5
+  # Sysmon config + metadata (written into OutDir)
+  $manifest.operator = $env:USERNAME
+  $sysmonCfgPath = Join-Path $OutDir "sysmon-config.xml"
+  $sysmonCfg = Make-Sysmon-Config -OutFile $sysmonCfgPath
+
+  $manifest.sysmon = @{
+    version = $sysmonCfg.sysmon_version
+    path    = $sysmonCfg.sysmon_path
+  }
+
+  $manifest.sysmon_config = @{
+    path    = $sysmonCfg.path
+    schema  = $sysmonCfg.schema
+    success = $sysmonCfg.success
+    error   = $sysmonCfg.error
+  }
+
+  $manifestJson = $manifest | ConvertTo-Json -Depth 10
   $manifestPath = Join-Path $OutDir "manifest.json"
   Set-Content -LiteralPath $manifestPath -Value $manifestJson -Encoding UTF8
 
@@ -255,12 +283,12 @@ function Install-Sysmon-Config {
 ### Dispatch ###
 switch ($Command) {
   "check-sysmon" {
-    $r=Check-Sysmon
+    $r = Check-Sysmon
     $r | ConvertTo-Json
     break
   }
   "make-sysmon-config" {
-    Make-Sysmon-Config -File $OutFile
+    Make-Sysmon-Config -OutFile $OutFile | ConvertTo-Json
     break
   }
   "generate-wsb" {
@@ -269,8 +297,12 @@ switch ($Command) {
     break
   }
   "install-sysmon-config" {
-    $cfg = Make-Sysmon-Config -File $OutFile
-    Install-Sysmon-Config -ConfigPath $cfg
+    $cfg = Make-Sysmon-Config -OutFile $OutFile
+    if ($cfg.success) {
+      Install-Sysmon-Config -ConfigPath $cfg.path | Out-Null
+    } else {
+      Write-Log "Sysmon config generation failed; not applying."
+    }
     break
   }
   "run-demo" {
