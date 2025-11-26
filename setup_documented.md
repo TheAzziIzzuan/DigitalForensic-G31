@@ -7,14 +7,16 @@ Quick links: [Server Setup](#-server-setup) | [Windows Agent](#-windows-agent) |
 ## ✅ What You Need First
 
 ### Ubuntu/Linux Server
+
 - [ ] Ubuntu 18.04+ (or similar Linux)
 - [ ] 4GB RAM
 - [ ] 20GB free space
 - [ ] Internet connection
 - [ ] Admin access (sudo)
 
-### Windows Computers  
-- [ ] Windows 7 SP1+ 
+### Windows Computers
+
+- [ ] Windows 7 SP1+
 - [ ] PowerShell 5.0+
 - [ ] Admin access
 - [ ] Network to Wazuh server
@@ -47,9 +49,11 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
 ```
 
 Test it:
+
 ```bash
 sudo docker run hello-world
 ```
+
 ✅ Should see: `Hello from Docker!`
 
 ---
@@ -78,8 +82,9 @@ sudo docker compose up -d
 ```
 
 ✅ **Done!** Now go to: `https://localhost`
-- Username: `admin`  
-- Password: Check `.env` file
+
+- Username: `admin`
+- Password: SuperPassword
 
 ---
 
@@ -88,7 +93,7 @@ sudo docker compose up -d
 ### 1️⃣ Open PowerShell as Admin
 
 - Right-click Windows Start
-- Select "Windows PowerShell (Admin)"  
+- Select "Windows PowerShell (Admin)"
 - Click "Yes"
 
 ### 2️⃣ Download Agent
@@ -126,6 +131,7 @@ sudo docker ps
 ```
 
 You should see:
+
 - ✅ `wazuh.manager`
 - ✅ `wazuh.indexer`
 - ✅ `wazuh.dashboard`
@@ -170,6 +176,7 @@ Read the error. It usually tells you what's wrong.
 ### Windows Agent Won't Install
 
 **Check these:**
+
 - Running PowerShell as Admin? ✓
 - Server IP correct? ✓
 - Can reach server? `ping SERVER_IP`
@@ -197,11 +204,6 @@ Settings → Firewall → Allow app → Add `ossec.exe`
 ### Still Stuck?
 
 Check logs:
+
 - **Server:** `sudo docker compose logs`
 - **Agent:** `C:\Program Files (x86)\ossec-agent\logs\`
-
-
-
-
-
-
