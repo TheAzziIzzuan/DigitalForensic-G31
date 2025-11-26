@@ -6,9 +6,9 @@ Sandevistan is a two-part detection validation toolkit composed of a Sandbox Sim
 
 This toolkit includes:
 - yyy.ps1 : The Sandbox Simulation Engine. This
-      - Launch Windows Sandbox automatically
+      - Launches Windows Sandbox automatically
       - Deploy deception artifacts
-      -Trigger malicious-like activity
+      - Trigger malicious-like activity
 - sysmon-config.xml: A Host-Side Observability Engine
       - A sysmon configuration that enables detection on the "infected" host machine"
 - Wazuh rules : to validate the sysmon alerts on SIEM platform (!! this part i not sure, to double check)
