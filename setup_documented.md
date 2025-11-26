@@ -207,3 +207,7 @@ Check logs:
 
 - **Server:** `sudo docker compose logs`
 - **Agent:** `C:\Program Files (x86)\ossec-agent\logs\`
+
+
+Setting up sysmon monitoring on Windows:
+- 
