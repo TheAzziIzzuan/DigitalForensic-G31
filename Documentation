@@ -1,5 +1,5 @@
 **Wazuh Server Installation**
-Step 1: Install Docker
+Step 1: Install Docker on Ubuntu
 # Add Docker's official GPG key:
 sudo apt-get update
 sudo apt-get install ca-certificates curl
@@ -28,6 +28,12 @@ docker-compose -f generate-indexer-certs.yml run --rm generator
 Start docker instance: sudo docker compose up -d
 
 **Wazuh Agent Installation for Windows**
+On Windows Powershell (Run ad Admin):
+Download Agent Installer: Invoke-WebRequest -Uri "https://packages.wazuh.com/4.x/windows/wazuh-agent-4.12.0-1.msi?raw=1" -OutFile "$env:TEMP\wazuh-agent.msi"
+Install the MSI: msiexec.exe /i "C:\Users\qothr\Downloads\wazuh-agent.msi" WAZUH_MANAGER="<your-wazuh-manager>" WAZUH_AGENT_NAME="SANDEVISTAN-HOST"
+Verify Agent:
+- Get-Service OssecSvc
+- Get-ChildItem "C:\Program Files (x86)\ossec-agent"
 
 
 
