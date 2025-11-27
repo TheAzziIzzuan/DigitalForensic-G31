@@ -28,4 +28,30 @@ All commands follow this format:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\sandevistan.ps1 <command> [options]
+``` 
 
+---
+
+## Example Workflows
+### Quick Sysmon Check 
+```powershell
+powershell -ExecutionPolicy Bypass -File .\sandevistan.ps1 check-sysmon
+```
+
+### Generate Sysmon Config Only
+```powershell
+powershell -ExecutionPolicy Bypass -File .\sandevistan.ps1 make-sysmon-config -OutFile C:\Temp\sysmon.xml
+```
+
+### Generate Full Sandbox Environment
+```powershell
+powershell -ExecutionPolicy Bypass -File .\sandevistan.ps1 generate-wsb `
+  -OutDir C:\Sandy-Temp\run1 `
+  -CountFiles 10 `
+  -Profile heavy
+```
+Then launch the sandbox manually: 
+
+```powershell
+Start-Process "C:\Sandy-Temp\run1\SandevistanRandom.wsb"
+```
