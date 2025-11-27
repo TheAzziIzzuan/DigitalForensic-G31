@@ -140,6 +140,7 @@ You should see:
 
 ```powershell
 Get-Service OssecSvc
+Get-Service WazuhSvc
 ```
 
 Look for: `Status : Running`
