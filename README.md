@@ -1,14 +1,31 @@
-# DigitalForensic-G31
+# Sandevistan – Windows Sandbox Sysmon & Honeyfile Generator
 
-### Sandevistan: Windows Sandbox Detection Validation Toolkit
+`Sandevistan` is a prototype PowerShell CLI tool that:
 
-Sandevistan is a two-part detection validation toolkit composed of a Sandbox Simulation Engine (done through powershell) that generates malicious-like activity inside Windows Sandbox, and a tailored host-side Sysmon configuration that captures and forwards all Sandbox-originated telemetry to a SIEM for detection testing.
+- Detects Sysmon installation and version  
+- Generates a Sysmon configuration XML tailored for Windows Sandbox  
+- Produces honeyfile artifacts, a `.wsb` Windows Sandbox configuration file, and a `manifest.json`  
+- Optionally installs the generated Sysmon configuration into Sysmon  
+- Can automatically launch a Sandbox demo environment  
 
-This toolkit includes:
-- yyy.ps1: The Sandbox Simulation Engine. This
-      - Launches Windows Sandbox automatically
-      - Deploy deception artifacts
-      - Trigger malicious-like activity
-- sysmon-config.xml: A Host-Side Observability Engine
-      - A sysmon configuration that enables detection on the "infected" host machine"
-- Wazuh rules: to validate the sysmon alerts on SIEM platform (!! this part i not sure, to double check)
+All functionality is contained in a single script: `sandevistan.ps1`.
+
+---
+
+## Prerequisites
+
+- Windows 10/11 (Sandbox available on Pro/Enterprise)  
+- Windows PowerShell 5.x or later  
+- Windows Sandbox enabled (required for `.wsb` execution)  
+- Sysmon installed and available in `PATH`  
+- Administrator rights (only required for `install-sysmon-config`)
+
+---
+
+## Basic Usage
+
+All commands follow this format:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\sandevistan.ps1 <command> [options]
+
