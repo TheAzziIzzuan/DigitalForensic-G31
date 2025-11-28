@@ -81,7 +81,7 @@ sudo docker compose -f generate-indexer-certs.yml run --rm generator
 sudo docker compose up -d
 ```
 
-✅ **Done!** Now go to: `https://localhost`
+✅ Now go to: `https://<ip-address of Wazuh Server>`
 
 - Username: `admin`
 - Password: SecretPassword
