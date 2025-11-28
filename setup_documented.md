@@ -90,6 +90,8 @@ sudo docker compose up -d
 
 ## 🪟 Windows Agent
 
+### 1️⃣ Set VM network to bridge
+
 ### 1️⃣ Open PowerShell as Admin
 
 - Right-click Windows Start
@@ -115,7 +117,7 @@ msiexec.exe /i "$env:TEMP\wazuh-agent.msi" WAZUH_MANAGER="SERVER_IP" WAZUH_AGENT
 ### 4️⃣ Start Agent
 
 ```powershell
-Start-Service -Name OssecSvc
+Start-Service -Name WazuhSvc
 ```
 
 ✅ **Agent is running!**
@@ -139,7 +141,6 @@ You should see:
 ### Agent Running?
 
 ```powershell
-Get-Service OssecSvc
 Get-Service WazuhSvc
 ```
 
