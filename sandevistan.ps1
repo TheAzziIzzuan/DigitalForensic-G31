@@ -75,90 +75,110 @@ function Check-Sysmon {
 }
 
 function Make-Sysmon-Config {
-    param(
-        [string]$OutFile = "C:\Sandy-Temp\run1\sysmon-config.xml"
-    )
+  param(
+    [Parameter(Mandatory=$true)][string]$OutFile
+  )
 
-    # Step 1: detect Sysmon version
-    $sysmon = Check-Sysmon
-    $schemaVersion = "4.90"  # default for recent versions
-    if ($sysmon.version -match "v(\d+)\.(\d+)") {
-        $major = [int]$matches[1]
-        $minor = [int]$matches[2]
-
-        # Map Sysmon versions to schema versions
-        switch ($major) {
-            13 { $schemaVersion = "4.30" }
-            14 { $schemaVersion = "4.40" }
-            15 { $schemaVersion = "4.90" }
-            default { $schemaVersion = "4.90" }
-        }
-    }
-
-    Write-Log "Generating Sysmon config for schema version $schemaVersion"
-
-    # Step 2: build config dynamically
-    $config = @"
-<Sysmon schemaversion="$schemaVersion">
-  <HashAlgorithms>sha256</HashAlgorithms>
+  $xml = @"
+<Sysmon schemaversion="4.83">
+  <HashAlgorithms>md5,sha256</HashAlgorithms>
   <EventFiltering>
 
-    <!-- Process Creation -->
+    <!-- 1. Process creation related to Windows Sandbox / Hyper-V -->
     <ProcessCreate onmatch="include">
-      <Image condition="contains">WindowsSandbox.exe</Image>
-      <Image condition="contains">wsb.exe</Image>
+      <!-- Windows Sandbox UI / broker -->
+      <Image condition="end with">WindowsSandbox.exe</Image>
       <Image condition="contains">WindowsSandboxClient.exe</Image>
       <Image condition="contains">WindowsSandboxServer.exe</Image>
+
+      <!-- Hyper-V compute / worker processes (vmcompute etc.) -->
+      <Image condition="end with">vmcompute.exe</Image>
+      <Image condition="end with">vmwp.exe</Image>
+      <Image condition="end with">vmsp.exe</Image>
+
+      <!-- VHD / storage tools if they get spawned -->
+      <Image condition="end with">diskpart.exe</Image>
+      <Image condition="end with">mountvol.exe</Image>
     </ProcessCreate>
 
-    <!-- Network Connections -->
+    <!-- 2. Network connections from Sandbox / Hyper-V processes -->
     <NetworkConnect onmatch="include">
       <Image condition="contains">WindowsSandbox</Image>
+      <Image condition="end with">vmcompute.exe</Image>
+      <Image condition="end with">vmwp.exe</Image>
     </NetworkConnect>
 
-    <!-- File Creation -->
+    <!-- 3. File creations for .wsb configs, VHD/VHDX and container base images -->
     <FileCreate onmatch="include">
+      <!-- Any .wsb configs -->
       <TargetFilename condition="end with">.wsb</TargetFilename>
+
+      <!-- Hyper-V / VHD disk images -->
+      <TargetFilename condition="end with">.vhd</TargetFilename>
       <TargetFilename condition="end with">.vhdx</TargetFilename>
+      <TargetFilename condition="contains">\ProgramData\Microsoft\Windows\Hyper-V\</TargetFilename>
+      <TargetFilename condition="contains">\ProgramData\Microsoft\Windows\Containers\</TargetFilename>
+
+      <!-- Your Sandevistan honeyfile / sandbox folder -->
+      <TargetFilename condition="contains">\Sandy-Temp\</TargetFilename>
     </FileCreate>
 
-    <!-- Registry Key Access -->
-    <RegistryEvent onmatch="include">
-      <TargetObject condition="contains">Sandbox</TargetObject>
-    </RegistryEvent>
+    <!-- 4. FileCreateStreamHash for integrity on VHD / honeyfile activity -->
+    <FileCreateStreamHash onmatch="include">
+      <TargetFilename condition="end with">.vhd</TargetFilename>
+      <TargetFilename condition="end with">.vhdx</TargetFilename>
+      <TargetFilename condition="contains">\Sandy-Temp\</TargetFilename>
+    </FileCreateStreamHash>
 
-    <!-- Image Load -->
+    <!-- 5. ImageLoad: drivers and DLLs tied to VHD / Hyper-V -->
     <ImageLoad onmatch="include">
-      <ImageLoaded condition="contains">WindowsSandbox</ImageLoaded>
+      <!-- Virtual disk driver -->
+      <ImageLoaded condition="end with">vhdmp.sys</ImageLoaded>
+      <!-- Hyper-V modules commonly loaded when VMs start -->
+      <ImageLoaded condition="contains">\System32\vmms.exe</ImageLoaded>
+      <ImageLoaded condition="contains">\System32\vmcompute.exe</ImageLoaded>
     </ImageLoad>
+
+    <!-- 6. Registry events mentioning Containers / Sandbox features -->
+    <RegistryEvent onmatch="include">
+      <TargetObject condition="contains">Containers-DisposableClientVM</TargetObject>
+      <TargetObject condition="contains">Hyper-V</TargetObject>
+      <TargetObject condition="contains">\FeatureManagement\Overrides</TargetObject>
+    </RegistryEvent>
 
   </EventFiltering>
 </Sysmon>
 "@
 
-    # Step 3: write config to disk
-    try {
-        $config | Out-File -FilePath $OutFile -Encoding utf8 -Force
-        Write-Log "Sysmon config created successfully at: $OutFile"
-        return @{
-            success        = $true
-            schema         = $schemaVersion
-            path           = $OutFile
-            sysmon_version = $sysmon.version
-            sysmon_path    = $sysmon.path
-        }
+  try {
+    $dir = Split-Path -Parent $OutFile
+    if (-not (Test-Path -LiteralPath $dir)) {
+      New-Item -ItemType Directory -Path $dir -Force | Out-Null
     }
-    catch {
-        Write-Log "Error writing Sysmon config: $_"
-        return @{
-            success        = $false
-            error          = $_.Exception.Message
-            schema         = $schemaVersion
-            path           = $OutFile
-            sysmon_version = $sysmon.version
-            sysmon_path    = $sysmon.path
-        }
+
+    Set-Content -LiteralPath $OutFile -Value $xml -Encoding ASCII
+    Write-Log "Sysmon config written to $OutFile"
+
+    $sysmonInfo = Check-Sysmon
+
+    return @{
+      path           = $OutFile
+      success        = $true
+      schema         = "4.83"
+      error          = $null
+      sysmon_version = $sysmonInfo.version
+      sysmon_path    = $sysmonInfo.path
     }
+  }
+  catch {
+    Write-Log "ERROR writing Sysmon config to $OutFile : $_"
+    return @{
+      path    = $OutFile
+      success = $false
+      schema  = "4.83"
+      error   = "$_"
+    }
+  }
 }
 
 function Generate-WSB {
@@ -311,3 +331,4 @@ switch ($Command) {
     break
   }
 }
+
