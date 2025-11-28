@@ -70,7 +70,7 @@ cd wazuh-docker/single-node
 ### Create Security Keys
 
 ```bash
-docker-compose -f generate-indexer-certs.yml run --rm generator
+sudo docker compose -f generate-indexer-certs.yml run --rm generator
 ```
 
 ---
@@ -84,7 +84,7 @@ sudo docker compose up -d
 ✅ **Done!** Now go to: `https://localhost`
 
 - Username: `admin`
-- Password: SuperPassword
+- Password: SecretPassword
 
 ---
 
