@@ -1,0 +1,10 @@
+<Configuration>
+  <MappedFolders>
+    <MappedFolder>
+      <HostFolder>C:\windows-sandbox</HostFolder>
+      <SandboxFolder>C:\windows-sandbox</SandboxFolder>
+      <ReadOnly>true</ReadOnly>
+    </MappedFolder>
+  </MappedFolders>
+  <Networking>Disable</Networking>
+</Configuration>
