@@ -81,12 +81,12 @@ powershell -ExecutionPolicy Bypass -File wsb-hunter.ps1
 ### Initial scan
 After running and waiting for a short while, you will encounter something like:
 
-- `\======== WSB RISK ANALYSIS ========\`
-- `\File: C:\WSB_Quarantine\rogue.wsb\`
-- `\Risk Score: 0\`
-- `\Details:\`
+- `======== WSB RISK ANALYSIS ========`
+- `File: C:\WSB_Quarantine\rogue.wsb`
+- `Risk Score: 0`
+- `Details:`
 
-- `\Delete this quarantined file? [y/N]:\`
+- `Delete this quarantined file? [y/N]:`
 
 You can choose to delete the quarantined file, or keep it in quarantine.
 
