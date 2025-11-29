@@ -30,6 +30,24 @@ function Is-TrustedPath {
     return $false
 }
 
+# --- SHA256 Hash Function ------------------------------------
+function Get-FileHashSHA256 {
+    param([string]$path)
+    
+    if (-not (Test-Path $path)) {
+        return $null
+    }
+    
+    try {
+        $hash = Get-FileHash -Path $path -Algorithm SHA256 -ErrorAction Stop
+        return $hash.Hash
+    }
+    catch {
+        Write-Log "ERROR: Unable to calculate hash for $path : $_"
+        return $null
+    }
+}
+
 # --- Risk Analysis (Silent Return) ------------------------------------
 function Analyze-WSB {
     param([string]$path)
@@ -101,11 +119,17 @@ function Analyze-WSB {
     }
 }
 
-# --- Quarantine Function -----------------------------------------
+# --- Quarantine Function with Hash Verification -----------------------------------------
 function Quarantine-File {
-    param([string]$path)
+    param(
+        [string]$path,
+        [string]$originalHash
+    )
 
-    if (-not (Test-Path $path)) { return }
+    if (-not (Test-Path $path)) { 
+        Write-Log "ERROR: File not found during quarantine: $path"
+        return 
+    }
 
     $name = Split-Path $path -Leaf
     $dest = Join-Path $QuarantineDir $name
@@ -119,9 +143,27 @@ function Quarantine-File {
     try {
         Move-Item -Path $path -Destination $dest -Force
         Write-Log "QUARANTINED: $path --> $dest"
+        
+        # Verify hash after quarantine
+        Write-Host "`n--- FORENSIC VERIFICATION ---" -ForegroundColor Cyan
+        $postHash = Get-FileHashSHA256 $dest
+        
+        if ($postHash -eq $originalHash) {
+            Write-Host "[OK] INTEGRITY VERIFIED: Hash matches after quarantine" -ForegroundColor Green
+            Write-Host "  Post-Quarantine SHA256: $postHash" -ForegroundColor Green
+            Write-Log "HASH VERIFIED: Original and quarantined file match (SHA256: $postHash)"
+        }
+        else {
+            Write-Host "[!] WARNING: Hash mismatch detected!" -ForegroundColor Red
+            Write-Host "  Original:  $originalHash" -ForegroundColor Yellow
+            Write-Host "  After Move: $postHash" -ForegroundColor Yellow
+            Write-Log "HASH MISMATCH: Original=$originalHash, After=$postHash"
+        }
+        Write-Host "-----------------------------`n"
     }
     catch {
         Write-Log "FAILED to quarantine $path : $_"
+        Write-Host "Error during quarantine: $_" -ForegroundColor Red
     }
 }
 
@@ -132,10 +174,20 @@ function Handle-Detection {
     Write-Host "`n======== WSB FILE DETECTED ========" -ForegroundColor Yellow
     Write-Host "Path: $path`n"
 
+    # Calculate SHA256 hash
+    $hash = Get-FileHashSHA256 $path
+    if ($hash) {
+        Write-Host "SHA256 Hash: $hash" -ForegroundColor Cyan
+        Write-Log "File hash: $path = $hash"
+    }
+    else {
+        Write-Host "SHA256 Hash: [Unable to calculate]" -ForegroundColor Red
+    }
+
     # Get risk analysis
     $risk = Analyze-WSB $path
 
-    Write-Host "Risk Score: $($risk.Score)"
+    Write-Host "`nRisk Score: $($risk.Score)"
     Write-Host "Details:"
     foreach ($d in $risk.Details) { Write-Host " - $d" }
 
@@ -148,15 +200,15 @@ function Handle-Detection {
     switch -regex ($choice) {
         "^[Aa]$" {
             Write-Host "File left untouched."
-            Write-Log "User allowed file: $path"
+            Write-Log "User allowed file: $path (SHA256: $hash)"
         }
         "^[Qq]$" {
-            Quarantine-File $path
+            Quarantine-File -path $path -originalHash $hash
         }
         "^[Dd]$" {
             try {
                 Remove-Item $path -Force
-                Write-Log "User deleted file: $path"
+                Write-Log "User deleted file: $path (SHA256: $hash)"
                 Write-Host "File deleted."
             }
             catch {
@@ -187,7 +239,7 @@ foreach ($root in $WatchRoots) {
 
     foreach ($f in $files) {
         $fullPath = $f.FullName
-        $Seen[$fullPath] = $true  # ← Mark as seen to avoid duplicate detection
+        $Seen[$fullPath] = $true
 
         if (-not (Is-TrustedPath $fullPath)) {
             Handle-Detection $fullPath
