@@ -4,16 +4,22 @@ param(
     [string]$LogFile = "C:\WSB_Quarantine\wsb-hunter.log"
 )
 
-# --- Setup
-if (-not (Test-Path $QuarantineDir)) { New-Item -ItemType Directory -Path $QuarantineDir | Out-Null }
+# --- Setup -----------------------------------------------------
+if (-not (Test-Path $QuarantineDir)) {
+    New-Item -ItemType Directory -Path $QuarantineDir | Out-Null
+}
+
 $logDir = Split-Path $LogFile
-if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir | Out-Null }
+if (-not (Test-Path $logDir)) {
+    New-Item -ItemType Directory -Path $logDir | Out-Null
+}
 
 function Write-Log {
     param([string]$msg)
     $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    Add-Content -Path $LogFile -Value "[$ts] $msg"
-    Write-Host "[$ts] $msg"
+    $line = "[$ts] $msg"
+    Add-Content -Path $LogFile -Value $line
+    Write-Host $line
 }
 
 function Is-TrustedPath {
@@ -24,6 +30,89 @@ function Is-TrustedPath {
     return $false
 }
 
+# --- Risk Analysis -----------------------------------------------------
+function Analyze-WSB {
+    param([string]$path)
+
+    if (-not (Test-Path $path)) { return }
+
+    try {
+        [xml]$xml = Get-Content $path -ErrorAction Stop
+    }
+    catch {
+        Write-Log "Unable to parse XML in $path"
+        return
+    }
+
+    $score = 0
+    $details = @()
+
+    # Networking
+    if ($xml.Configuration.Networking -eq "Enable") {
+        $score += 20
+        $details += "Networking enabled (+20)"
+    }
+
+    # Mapped folders
+    $mapped = $xml.Configuration.MappedFolders.MappedFolder
+    if ($mapped) {
+        $score += 20
+        $details += "Folder mapping present (+20)"
+
+        foreach ($m in $mapped) {
+            if ($m.ReadOnly -eq "false") {
+                $score += 10
+                $details += "Writable mapped folder (+10)"
+            }
+
+            if ($m.HostFolder -match "Public|Temp|AppData") {
+                $score += 10
+                $details += "Mapped to malware staging folder (+10)"
+            }
+        }
+    }
+
+    # LogonCommand
+    $cmd = $xml.Configuration.LogonCommand.Command
+    if ($cmd) {
+        $score += 30
+        $details += "Auto-Execution command present (+30)"
+
+        if ($cmd -match "\.bat$|\.exe$|7z\.exe") {
+            $score += 40
+            $details += "Suspicious executable in LogonCommand (+40)"
+        }
+    }
+
+    # Memory
+    $mem = $xml.Configuration.MemoryInMB
+    if ($mem -as [int] -gt 1024) {
+        $score += 5
+        $details += "Unusually high memory allocation (+5)"
+    }
+
+    # --- Output Risk Summary -----------------------------------------
+    Write-Host "`n======== WSB RISK ANALYSIS ========" -ForegroundColor Cyan
+    Write-Host "File: $path"
+    Write-Host "Risk Score: $score"
+    Write-Host "Details:"
+    foreach ($d in $details) { Write-Host " - $d" }
+
+    # --- Ask User for Decision ---------------------------------------
+    Write-Host ""
+    $choice = Read-Host "Delete this quarantined file? [y/N]"
+
+    if ($choice -match "^[Yy]") {
+        Remove-Item $path -Force
+        Write-Log "User deleted quarantined file: $path"
+        Write-Host "File deleted."
+    }
+    else {
+        Write-Host "File retained in quarantine."
+    }
+}
+
+# --- Quarantine + Trigger Risk Analysis -------------------------------
 function Quarantine-File {
     param([string]$path)
 
@@ -32,16 +121,23 @@ function Quarantine-File {
     $name = Split-Path $path -Leaf
     $dest = Join-Path $QuarantineDir $name
 
+    # If duplicate, append timestamp
+    if (Test-Path $dest) {
+        $stamp = Get-Date -Format "yyyyMMddHHmmss"
+        $dest = Join-Path $QuarantineDir ("$stamp-$name")
+    }
+
     try {
         Move-Item -Path $path -Destination $dest -Force
         Write-Log "QUARANTINED: $path --> $dest"
+        Analyze-WSB $dest   # Run analysis after quarantine
     }
     catch {
         Write-Log "FAILED to quarantine $path : $_"
     }
 }
 
-# --- Scan paths where .wsb files are likely to appear
+# --- Watch Roots (realistic sandbox staging zones) ---------------------
 $WatchRoots = @(
     "$env:USERPROFILE",
     "$env:PUBLIC",
@@ -67,8 +163,8 @@ foreach ($root in $WatchRoots) {
 Write-Log "===== INITIAL SCAN DONE ====="
 Write-Log "Real-time monitoring active (WSB only)."
 
-# --- REAL-TIME LOOP (fast, stable)
-$Seen = @{}  # hashset of seen .wsb files
+# --- Real-time detection loop -----------------------------------------
+$Seen = @{}
 
 while ($true) {
     foreach ($root in $WatchRoots) {
@@ -82,7 +178,6 @@ while ($true) {
             if (-not $Seen[$p]) {
                 $Seen[$p] = $true
 
-                # Trusted exemption only
                 if (Is-TrustedPath $p) {
                     Write-Log "IGNORED (trusted folder): $p"
                     continue
@@ -94,5 +189,5 @@ while ($true) {
         }
     }
 
-    Start-Sleep -Seconds 1   # ← detection speed
+    Start-Sleep -Seconds 1
 }
