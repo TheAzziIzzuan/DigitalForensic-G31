@@ -66,26 +66,30 @@ echo "<Configuration></Configuration>" > C:\Users\seanl\Downloads\rogue.wsb
 
 For all commands below, adjust the path of rogue.wsb as needed.
 Testing must be done under one of these paths:
-C:\Users\[Your User]\
-C:\Users\Public\
-C:\Users\[Your User]\AppData\Local\Temp\
+
+- `C:\Users\[Your User]\`
+- `C:\Users\Public\`
+- `C:\Users\[Your User]\AppData\Local\Temp\`
+  
 
 ### Running wsb-hunter
 ```powershell
 powershell -ExecutionPolicy Bypass -File wsb-hunter.ps1
 ```
 
+
 ### Initial scan
 After running and waiting for a short while, you will encounter something like:
 
-======== WSB RISK ANALYSIS ========
-File: C:\WSB_Quarantine\rogue.wsb
-Risk Score: 0
-Details:
+- `\======== WSB RISK ANALYSIS ========\`
+- `\File: C:\WSB_Quarantine\rogue.wsb\`
+- `\Risk Score: 0\`
+- `\Details:\`
 
-Delete this quarantined file? [y/N]: y
+- `\Delete this quarantined file? [y/N]:\`
 
 You can choose to delete the quarantined file, or keep it in quarantine.
+
 
 ### Testing real-time detection
 Run the same line of code that generates rogue.wsb again on another Powershell terminal.
@@ -94,6 +98,7 @@ echo "<Configuration></Configuration>" > C:\Users\seanl\Downloads\rogue.wsb
 ```
 
 After a short while, you should reencounter the same analysis result as above.
+
 
 ### Testing risk-level capability
 Note how rogue.wsb gave a Risk Score of 0, since it is empty.
