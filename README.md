@@ -86,9 +86,11 @@ After running and waiting for a short while, you will encounter something like:
 - `Risk Score: 0`
 - `Details:`
 
-- `Delete this quarantined file? [y/N]:`
+- `[A] Allow (leave it)`
+- `[Q] Quarantine it`
+- `[D] Delete immediately`
 
-You can choose to delete the quarantined file, or keep it in quarantine.
+You can choose to leave the file if you know it is harmless, quarantine it in a safe location for further inspection, or delete it immediately
 
 
 ### Testing real-time detection
