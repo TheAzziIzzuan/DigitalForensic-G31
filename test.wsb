@@ -1,0 +1,12 @@
+<Configuration>
+  <Networking>Enable</Networking>
+  <MappedFolders>
+    <MappedFolder>
+      <HostFolder>C:\SandboxConfigs</HostFolder>
+      <ReadOnly>false</ReadOnly>
+    </MappedFolder>
+  </MappedFolders>
+  <LogonCommand>
+    <Command>cmd.exe /c echo sandbox test > C:\Users\WDAGUtilityAccount\Desktop\test.txt</Command>
+  </LogonCommand>
+</Configuration>
