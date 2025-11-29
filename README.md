@@ -64,7 +64,7 @@ First, create a test .wsb file to demonstrate wsb-hunter's initial scan detectio
 echo "<Configuration></Configuration>" > C:\Users\seanl\Downloads\rogue.wsb
 ```
 
-For all commands below, adjust the path of rogue.wsb as needed.
+For the above command, and all commands below, adjust the path of rogue.wsb as needed.
 Testing must be done under one of these paths:
 
 - `C:\Users\[Your User]\`
