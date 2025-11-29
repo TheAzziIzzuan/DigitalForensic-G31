@@ -30,18 +30,22 @@ function Is-TrustedPath {
     return $false
 }
 
-# --- Risk Analysis -----------------------------------------------------
+# --- Risk Analysis (Silent Return) ------------------------------------
 function Analyze-WSB {
     param([string]$path)
 
-    if (-not (Test-Path $path)) { return }
+    if (-not (Test-Path $path)) {
+        return $null
+    }
 
     try {
         [xml]$xml = Get-Content $path -ErrorAction Stop
     }
     catch {
-        Write-Log "Unable to parse XML in $path"
-        return
+        return @{
+            Score = 0
+            Details = @("Unable to parse XML")
+        }
     }
 
     $score = 0
@@ -67,7 +71,7 @@ function Analyze-WSB {
 
             if ($m.HostFolder -match "Public|Temp|AppData") {
                 $score += 10
-                $details += "Mapped to malware staging folder (+10)"
+                $details += "Mapped to common malware staging folder (+10)"
             }
         }
     }
@@ -91,28 +95,13 @@ function Analyze-WSB {
         $details += "Unusually high memory allocation (+5)"
     }
 
-    # --- Output Risk Summary -----------------------------------------
-    Write-Host "`n======== WSB RISK ANALYSIS ========" -ForegroundColor Cyan
-    Write-Host "File: $path"
-    Write-Host "Risk Score: $score"
-    Write-Host "Details:"
-    foreach ($d in $details) { Write-Host " - $d" }
-
-    # --- Ask User for Decision ---------------------------------------
-    Write-Host ""
-    $choice = Read-Host "Delete this quarantined file? [y/N]"
-
-    if ($choice -match "^[Yy]") {
-        Remove-Item $path -Force
-        Write-Log "User deleted quarantined file: $path"
-        Write-Host "File deleted."
-    }
-    else {
-        Write-Host "File retained in quarantine."
+    return @{
+        Score = $score
+        Details = $details
     }
 }
 
-# --- Quarantine + Trigger Risk Analysis -------------------------------
+# --- Quarantine Function -----------------------------------------
 function Quarantine-File {
     param([string]$path)
 
@@ -121,7 +110,7 @@ function Quarantine-File {
     $name = Split-Path $path -Leaf
     $dest = Join-Path $QuarantineDir $name
 
-    # If duplicate, append timestamp
+    # Prevent overwrite
     if (Test-Path $dest) {
         $stamp = Get-Date -Format "yyyyMMddHHmmss"
         $dest = Join-Path $QuarantineDir ("$stamp-$name")
@@ -130,14 +119,59 @@ function Quarantine-File {
     try {
         Move-Item -Path $path -Destination $dest -Force
         Write-Log "QUARANTINED: $path --> $dest"
-        Analyze-WSB $dest   # Run analysis after quarantine
     }
     catch {
         Write-Log "FAILED to quarantine $path : $_"
     }
 }
 
-# --- Watch Roots (realistic sandbox staging zones) ---------------------
+# --- User Decision Menu -------------------------------------------
+function Handle-Detection {
+    param([string]$path)
+
+    Write-Host "`n======== WSB FILE DETECTED ========" -ForegroundColor Yellow
+    Write-Host "Path: $path`n"
+
+    # Get risk analysis
+    $risk = Analyze-WSB $path
+
+    Write-Host "Risk Score: $($risk.Score)"
+    Write-Host "Details:"
+    foreach ($d in $risk.Details) { Write-Host " - $d" }
+
+    Write-Host ""
+    Write-Host "[A] Allow (leave it)"
+    Write-Host "[Q] Quarantine it"
+    Write-Host "[D] Delete immediately"
+    $choice = Read-Host "Selection"
+
+    switch -regex ($choice) {
+        "^[Aa]$" {
+            Write-Host "File left untouched."
+            Write-Log "User allowed file: $path"
+        }
+        "^[Qq]$" {
+            Quarantine-File $path
+        }
+        "^[Dd]$" {
+            try {
+                Remove-Item $path -Force
+                Write-Log "User deleted file: $path"
+                Write-Host "File deleted."
+            }
+            catch {
+                Write-Log "FAILED to delete $path : $_"
+            }
+        }
+        default {
+            Write-Host "Invalid choice. No action taken."
+            Write-Log "User made invalid choice for: $path"
+        }
+    }
+}
+
+$Seen = @{}
+
 $WatchRoots = @(
     "$env:USERPROFILE",
     "$env:PUBLIC",
@@ -152,10 +186,14 @@ foreach ($root in $WatchRoots) {
     $files = Get-ChildItem -Path $root -Filter *.wsb -Recurse -Depth 5 -Force -ErrorAction Ignore
 
     foreach ($f in $files) {
-        if (-not (Is-TrustedPath $f.FullName)) {
-            Quarantine-File $f.FullName
-        } else {
-            Write-Log "IGNORED (trusted): $($f.FullName)"
+        $fullPath = $f.FullName
+        $Seen[$fullPath] = $true  # ← Mark as seen to avoid duplicate detection
+
+        if (-not (Is-TrustedPath $fullPath)) {
+            Handle-Detection $fullPath
+        }
+        else {
+            Write-Log "IGNORED (trusted): $fullPath"
         }
     }
 }
@@ -163,9 +201,9 @@ foreach ($root in $WatchRoots) {
 Write-Log "===== INITIAL SCAN DONE ====="
 Write-Log "Real-time monitoring active (WSB only)."
 
-# --- Real-time detection loop -----------------------------------------
-$Seen = @{}
-
+# ------------------------------------------------------------------
+# Real-time Monitoring Loop
+# ------------------------------------------------------------------
 while ($true) {
     foreach ($root in $WatchRoots) {
         if (-not (Test-Path $root)) { continue }
@@ -184,7 +222,7 @@ while ($true) {
                 }
 
                 Write-Log "DETECTED NEW WSB FILE: $p"
-                Quarantine-File $p
+                Handle-Detection $p
             }
         }
     }
