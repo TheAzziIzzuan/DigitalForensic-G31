@@ -22,7 +22,9 @@ All functionality is contained in a single script: `sandevistan.ps1`.
 - Administrator rights (only required for `install-sysmon-config`)
 
 ---
-## USER MANUAL 
+# USER MANUAL 
+
+## Basic Usage
 All commands follow this format:
 
 ```powershell
