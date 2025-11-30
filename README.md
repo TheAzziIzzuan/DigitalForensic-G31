@@ -16,7 +16,6 @@
 - Produces honeyfile artifacts, a `.wsb` Windows Sandbox configuration file, and a `manifest.json`  
 - Optionally installs the generated Sysmon configuration into Sysmon  
 - Can automatically launch a Sandbox demo environment
-- Hunt for suspicious/rogue .wsb files 
 
 
 ---
