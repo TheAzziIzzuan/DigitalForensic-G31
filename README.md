@@ -83,6 +83,7 @@ After running and waiting for a short while, you will encounter something like:
 
 - `======== WSB RISK ANALYSIS ========`
 - `File: C:\WSB_Quarantine\rogue.wsb`
+- `SHA256 hash: [hash]`
 - `Risk Score: 0`
 - `Details:`
 
