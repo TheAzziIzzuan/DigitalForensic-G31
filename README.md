@@ -7,9 +7,10 @@
 - Generates a Sysmon configuration XML tailored for Windows Sandbox  
 - Produces honeyfile artifacts, a `.wsb` Windows Sandbox configuration file, and a `manifest.json`  
 - Optionally installs the generated Sysmon configuration into Sysmon  
-- Can automatically launch a Sandbox demo environment  
+- Can automatically launch a Sandbox demo environment
+- Hunt for suspicious/rogue .wsb files 
 
-All functionality is contained in a single script: `sandevistan.ps1`.
+All functionality is split among two scripts: `sandevistan.ps1` and `wsb-hunter.ps1`.
 
 ---
 
