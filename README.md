@@ -124,6 +124,9 @@ You can try the various other test cases we have in our test-cases folder in the
 ### Quarantine folder
 The quarantine folder is located at C:\WSB_Quarantine. All quarantined files are relocated here
 
+### Log file
+The log file is also placed into the quarantine folder, containing logs of all the events that occur in the hunter.
+
 ## Sysmon Visibility
   
 ### Basic Usage
