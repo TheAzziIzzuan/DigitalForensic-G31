@@ -23,42 +23,10 @@ All functionality is contained in a single script: `sandevistan.ps1`.
 
 ---
 # USER MANUAL 
-- Upon downloading this repository, navigate to the folder that contains wsb-hunter.ps1 to execute the following commands
-  
-## Basic Usage
-All commands follow this format:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\sandevistan.ps1 <command> [options]
-``` 
-
----
-
-## Example Workflows
-### Quick Sysmon Check 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\sandevistan.ps1 check-sysmon
-```
-
-### Generate Sysmon Config Only
-```powershell
-powershell -ExecutionPolicy Bypass -File .\sandevistan.ps1 make-sysmon-config -OutFile C:\Temp\sysmon.xml
-```
-
-### Generate Full Sandbox Environment
-```powershell
-powershell -ExecutionPolicy Bypass -File .\sandevistan.ps1 generate-wsb `
-  -OutDir C:\Sandy-Temp\run1 `
-  -CountFiles 10 `
-  -Profile heavy
-```
-Then launch the sandbox manually: 
-
-```powershell
-Start-Process "C:\Sandy-Temp\run1\SandevistanRandom.wsb"
-```
 
 ## wsb-hunter.ps1 usage
+
+- Navigate to the folder that contains wsb-hunter.ps1 to execute the following commands
 
 ### Running wsb-hunter
 ```powershell
@@ -91,14 +59,14 @@ After running and waiting for a short while, you will encounter this:
 
 If you so happen to have your own, other .wsb files on your system that are identified, their risk analysis may pop up first before harmless.wsb's risk analysis, as identified .wsb files appear one by one. Just input 'A' to leave these .wsb files alone
 
-The user can choose one of three options, depending on what letter they input:
-A: Leave the .wsb as is. If they know for a fact it is harmless, for example
-Q: Sends the .wsb file to a quarantine folder, WSB_Quarantine, located on the C drive
-D: Completely removes the .wsb file
+- The user can choose one of three options, depending on what letter they input:
+- A: Leave the .wsb as is. If they know for a fact it is harmless, for example
+- Q: Sends the .wsb file to a quarantine folder, WSB_Quarantine, located on the C drive
+- D: Completely removes the .wsb file
 
 
 ### Real-time detection
-The hunter is also capable of detecting .wsb files that are newly introduced while it is running. You can try this by creating a new .wsb file while it is running like so:
+The hunter is also capable of detecting .wsb files that are newly introduced while it is running. You can try this by creating a new .wsb file while it is running on a second Powershell terminal, like so:
 ```powershell
 echo "<Configuration></Configuration>" > C:\Users\$env:USERPROFILE\Downloads\harmless2.wsb
 ```
@@ -156,6 +124,37 @@ You can try the various other test cases we have in our test-cases folder in the
 ### Quarantine folder
 The quarantine folder is located at C:\WSB_Quarantine. All quarantined files are relocated here
 
-### Log file
-The log file is also placed into the quarantine folder, containing logs of all the events that occur in the hunter.
+## Sysmon Visibility
+  
+### Basic Usage
+All commands follow this format:
 
+```powershell
+powershell -ExecutionPolicy Bypass -File .\sandevistan.ps1 <command> [options]
+``` 
+
+---
+
+## Example Workflows
+### Quick Sysmon Check 
+```powershell
+powershell -ExecutionPolicy Bypass -File .\sandevistan.ps1 check-sysmon
+```
+
+### Generate Sysmon Config Only
+```powershell
+powershell -ExecutionPolicy Bypass -File .\sandevistan.ps1 make-sysmon-config -OutFile C:\Temp\sysmon.xml
+```
+
+### Generate Full Sandbox Environment
+```powershell
+powershell -ExecutionPolicy Bypass -File .\sandevistan.ps1 generate-wsb `
+  -OutDir C:\Sandy-Temp\run1 `
+  -CountFiles 10 `
+  -Profile heavy
+```
+Then launch the sandbox manually: 
+
+```powershell
+Start-Process "C:\Sandy-Temp\run1\SandevistanRandom.wsb"
+```
