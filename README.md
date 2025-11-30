@@ -40,7 +40,7 @@
 powershell -ExecutionPolicy Bypass -File wsb-hunter.ps1
 ```
 
-### Create a harm .wsb file for testing
+### Create a harmless .wsb file for testing
 First, create a test .wsb file to demonstrate wsb-hunter's initial scan detection
 ```powershell
 echo "<Configuration></Configuration>" > "$env:USERPROFILE\Downloads\harmless.wsb"
