@@ -1,4 +1,4 @@
-# Sandevistan – Host-Side Sandbox Abuse Detection and Telemetry Analysis System![Uploading image.png…]()
+# Sandevistan – Host-Side Sandbox Abuse Detection and Telemetry Analysis System
 
 
 `Sandevistan` is a prototype PowerShell CLI tool that:
