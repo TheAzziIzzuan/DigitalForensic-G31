@@ -112,29 +112,6 @@ Detector polls filesystem
 
 DetectionLatencyMs = Time elapsed
 
-### Data Analysis
-
-The CSV output is ready for analysis in multiple tools:
-
-**Excel:**
-1. Open C:\WSB_Quarantine\performance.csv
-2. Create charts (Timestamp vs DetectionLatencyMs)
-3. Generate pivot tables by depth
-
-**Python:**
-\\\python
-import pandas as pd
-df = pd.read_csv('C:\\\\WSB_Quarantine\\\\performance.csv')
-print(df['DetectionLatencyMs'].describe())
-print(f"95th percentile: {df['DetectionLatencyMs'].quantile(0.95)}")
-\\\
-
-**R:**
-\\\
-df <- read.csv('C:\\\\WSB_Quarantine\\\\performance.csv')
-boxplot(df\, main="Detection Latency Distribution")
-\\\
-
 ## Output Files
 
 After running experiments, the following files are generated:
