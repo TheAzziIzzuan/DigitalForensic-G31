@@ -1,8 +1,16 @@
 # Sandevistan – Host-Side Sandbox Abuse Detection and Telemetry Analysis System
 
 
-`Sandevistan` is a prototype PowerShell CLI tool that:
+`Sandevistan` is a prototype PowerShell CLI tool, with two different parts split between `wsb-hunter.ps1` and `sandevistan.ps1` :
 
+### wsb-hunter.ps1
+- Performs a hunt for .wsb files in directories commonly exploited by APTs, that may potentially be malicious
+- Examine configuration contents of each identified .wsb file and gives the user a risk score
+- Detects configurations that could potentially be misused, such as writable folder mappings, networking enablement, and auto-execution commands
+- Offers a list of action for user to undertake for each identified .wsb: ignore, quarantine with integrity preservation, or delete
+- Generates a log file in the quarantine folder that records all actions taken during its execution
+
+### sandevistan.ps1
 - Detects Sysmon installation and version  
 - Generates a Sysmon configuration XML tailored for Windows Sandbox  
 - Produces honeyfile artifacts, a `.wsb` Windows Sandbox configuration file, and a `manifest.json`  
@@ -10,7 +18,6 @@
 - Can automatically launch a Sandbox demo environment
 - Hunt for suspicious/rogue .wsb files 
 
-All functionality is split among two scripts: `sandevistan.ps1` and `wsb-hunter.ps1`.
 
 ---
 
