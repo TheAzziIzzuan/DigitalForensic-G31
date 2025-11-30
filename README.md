@@ -66,7 +66,7 @@ After running and waiting for a short while, you will encounter this:
 
 If you so happen to have your own, other .wsb files on your system that are identified, their risk analysis may pop up first before harmless.wsb's risk analysis, as identified .wsb files appear one by one. Just input 'A' to leave these .wsb files alone
 
-- The user can choose one of three options, depending on what letter they input:
+The user can choose one of three options, depending on what letter they input:
 - A: Leave the .wsb as is. If they know for a fact it is harmless, for example
 - Q: Sends the .wsb file to a quarantine folder, WSB_Quarantine, located on the C drive
 - D: Completely removes the .wsb file
@@ -82,7 +82,7 @@ After a short while, you should reencounter the same analysis result as above.
 
 
 ### Risk-level capability
-Note how rogue.wsb gave a Risk Score of 0, since it is empty.
+Note how harmless.wsb gave a Risk Score of 0, since it is empty.
 
 On your second Powershell terminal, type:
 ```powershell
@@ -125,7 +125,7 @@ Next, try:
 
 A new analysis result will appear on the first Powershell screen, returning a Risk Score of 135 and explaining the rationale behind the score.
 
-You can try the various other test cases we have in our test-cases folder in the repository.
+You can try the various other test cases we have in our test-cases folder in the repository. These test cases are demonstrated in our report and demo.
 
 
 ### Quarantine folder
