@@ -57,33 +57,29 @@ Then launch the sandbox manually:
 Start-Process "C:\Sandy-Temp\run1\SandevistanRandom.wsb"
 ```
 
-## wsb-hunter usage
-
-### Create first .wsb file
-First, create a test .wsb file to demonstrate wsb-hunter's initial scan detection
-```powershell
-echo "<Configuration></Configuration>" > C:\Users\seanl\Downloads\rogue.wsb
-```
-
-For the above command, and all commands below, adjust the path of rogue.wsb as needed.
-Testing must be done under one of these paths:
-
-- `C:\Users\[Your User]\`
-- `C:\Users\Public\`
-- `C:\Users\[Your User]\AppData\Local\Temp\`
-  
+## wsb-hunter.ps1 usage
 
 ### Running wsb-hunter
 ```powershell
 powershell -ExecutionPolicy Bypass -File wsb-hunter.ps1
 ```
 
+### Create a harm .wsb file for testing
+First, create a test .wsb file to demonstrate wsb-hunter's initial scan detection
+```powershell
+echo "<Configuration></Configuration>" > "$env:USERPROFILE\Downloads\harmless.wsb"
+```
+Downloads is one of the default directories the hunter monitors. These are all the directories it monitors by default, so test .wsb files can be inserted into any one of these:
 
+- `C:\Users\$env:USERPROFILE\`
+- `C:\Users\Public\`
+- `C:\Users\$env:USERPROFILE\AppData\Local\Temp\`
+  
 ### Initial scan
-After running and waiting for a short while, you will encounter something like:
+After running and waiting for a short while, you will encounter this:
 
 - `======== WSB RISK ANALYSIS ========`
-- `File: C:\WSB_Quarantine\rogue.wsb`
+- `Path: C:\$env:USERPROFILE\Downloads\harmless.wsb`
 - `SHA256 hash: [hash]`
 - `Risk Score: 0`
 - `Details:`
@@ -92,19 +88,24 @@ After running and waiting for a short while, you will encounter something like:
 - `[Q] Quarantine it`
 - `[D] Delete immediately`
 
-You can choose to leave the file if you know it is harmless, quarantine it in a safe location for further inspection, or delete it immediately
+If you so happen to have your own, other .wsb files on your system that are identified, their risk analysis may pop up first before harmless.wsb's risk analysis, as identified .wsb files appear one by one. Just input 'A' to leave these .wsb files alone
+
+The user can choose one of three options, depending on what letter they input:
+A: Leave the .wsb as is. If they know for a fact it is harmless, for example
+Q: Sends the .wsb file to a quarantine folder, WSB_Quarantine, located on the C drive
+D: Completely removes the .wsb file
 
 
-### Testing real-time detection
-Run the same line of code that generates rogue.wsb again on another Powershell terminal.
+### Real-time detection
+The hunter is also capable of detecting .wsb files that are newly introduced while it is running. You can try this by creating a new .wsb file while it is running like so:
 ```powershell
-echo "<Configuration></Configuration>" > C:\Users\seanl\Downloads\rogue.wsb
+echo "<Configuration></Configuration>" > C:\Users\$env:USERPROFILE\Downloads\harmless2.wsb
 ```
 
 After a short while, you should reencounter the same analysis result as above.
 
 
-### Testing risk-level capability
+### Risk-level capability
 Note how rogue.wsb gave a Risk Score of 0, since it is empty.
 
 On your second Powershell terminal, type:
@@ -123,7 +124,7 @@ On your second Powershell terminal, type:
   </LogonCommand>
   <MemoryInMB>2048</MemoryInMB>
 </Configuration>
-"@ > C:\Users\seanl\Downloads\mediumrisk.wsb
+"@ > C:\Users\$env:USERPROFILE\Downloads\mediumrisk.wsb
 ```
 A new analysis result will appear on the first Powershell screen, returning a Risk Score of 80 and explaining the rationale behind the score.
 
@@ -143,8 +144,17 @@ Next, try:
   </LogonCommand>
   <MemoryInMB>2048</MemoryInMB>
 </Configuration>
-"@ > C:\Users\seanl\Downloads\highrisk.wsb
+"@ > C:\Users\$env:USERPROFILE\Downloads\highrisk.wsb
 ```
+
 A new analysis result will appear on the first Powershell screen, returning a Risk Score of 135 and explaining the rationale behind the score.
 
+You can try the various other test cases we have in our test-cases folder in the repository.
+
+
+### Quarantine folder
+The quarantine folder is located at C:\WSB_Quarantine. All quarantined files are relocated here
+
+### Log file
+The log file is also placed into the quarantine folder, containing logs of all the events that occur in the hunter.
 
