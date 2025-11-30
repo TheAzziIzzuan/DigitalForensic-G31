@@ -10,7 +10,7 @@ Your research infrastructure is now ready. All experimental results will be save
 
 ## What You Have
 
-### Scripts Created (in `\research\` folder)
+### Scripts Available
 
 1. **wsb-hunter-instrumented.ps1**
    - Enhanced detector with millisecond-precision timestamps
@@ -26,23 +26,12 @@ Your research infrastructure is now ready. All experimental results will be save
 
 3. **run-experiment.ps1**
    - Orchestrates test generation
-   - Runs 3 isolated depth tests × 30 trials each = 90 test cases
+   - Runs test file generation across multiple depths
    - Creates test files in isolated directory structures
 
-4. **analyze-results.ps1**
-   - Processes performance CSV
-   - Generates statistical summary (mean, stddev, min, max, median)
-   - Creates human-readable report
-
-5. **CSV_OUTPUT_FORMAT.md**
-   - Complete CSV format documentation
-   - Examples and use cases
-   - Python/R/Excel analysis templates
-
-6. **PHASE1_QUICKSTART.md**
-   - Quick reference guide
-   - 3-step quick start
-   - Troubleshooting
+4. **visualization.py**
+   - Python visualization tools for analyzing results
+   - Generates charts from CSV data
 
 ---
 
@@ -89,13 +78,13 @@ Timestamp,EventType,FilePath,DetectionLatencyMs,QuarantineLatencyMs,AnalysisLate
 
 **Terminal 1 - Detector** (Keep running)
 ```powershell
-cd C:\Users\itsam\OneDrive\Documents\GitHub\DigitalForensic-G31\research
+cd C:\Users\itsam\OneDrive\Documents\GitHub\DigitalForensic-G31\wsb latency testing
 powershell -ExecutionPolicy Bypass -File .\wsb-hunter-instrumented.ps1 -ScanScope Shallow -ScanDepth 1
 ```
 
 **Terminal 2 - Test Generator** (After 5 seconds)
 ```powershell
-cd C:\Users\itsam\OneDrive\Documents\GitHub\DigitalForensic-G31\research
+cd C:\Users\itsam\OneDrive\Documents\GitHub\DigitalForensic-G31\wsb latency testing
 powershell -ExecutionPolicy Bypass -File .\run-experiment.ps1 -TestDepth 1
 ```
 
@@ -188,7 +177,6 @@ boxplot(df$DetectionLatencyMs, main="Detection Latency Distribution")
 
 Refer to:
 - **Quick Start**: `QUICKSTART.md`
-- **CSV Format**: `CSV_OUTPUT_FORMAT.md`
 - **Script Help**: Read comments in each `.ps1` file
 
 **Ready to collect your first data! 🚀**

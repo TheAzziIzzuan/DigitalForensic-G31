@@ -3,12 +3,11 @@
 ## ✅ What Has Been Created
 
 ```
-C:\Users\itsam\OneDrive\Documents\GitHub\DigitalForensic-G31\research\
+C:\Users\itsam\OneDrive\Documents\GitHub\DigitalForensic-G31\wsb latency testing\
 ├── wsb-hunter-instrumented.ps1      ← Modified detector with CSV logging
 ├── generate-test-file.ps1            ← Creates test .wsb files
 ├── run-experiment.ps1                ← Orchestrates test file generation
-├── analyze-results.ps1               ← Processes CSV and generates report
-├── CSV_OUTPUT_FORMAT.md              ← Complete documentation
+├── visualization.py                  ← Python visualization tools
 └── QUICKSTART.md                     ← This file
 ```
 
@@ -36,7 +35,7 @@ Files hidden in obvious places where attackers leave initial payloads:
 
 **Terminal 1** (Keep running):
 ```powershell
-cd C:\Users\itsam\OneDrive\Documents\GitHub\DigitalForensic-G31\research
+cd C:\Users\itsam\OneDrive\Documents\GitHub\DigitalForensic-G31\wsb latency testing
 powershell -ExecutionPolicy Bypass -File .\wsb-hunter-instrumented.ps1 -ScanScope Shallow -ScanDepth 1
 ```
 
@@ -44,7 +43,7 @@ Wait for it to say: "Real-time monitoring active"
 
 **Terminal 2** (After detector is ready):
 ```powershell
-cd C:\Users\itsam\OneDrive\Documents\GitHub\DigitalForensic-G31\research
+cd C:\Users\itsam\OneDrive\Documents\GitHub\DigitalForensic-G31\wsb latency testing
 powershell -ExecutionPolicy Bypass -File .\run-experiment.ps1 -TestDepth 1 -TrialsPerConfig 100
 ```
 
