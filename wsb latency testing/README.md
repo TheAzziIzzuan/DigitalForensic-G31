@@ -1,182 +1,142 @@
-# 📊 WSB-Hunter Detection Latency Research
+# WSB-Hunter Detection Latency Research
 
-## Summary
+## Overview
 
-**CSV Output: ✅ YES - All results automatically logged to CSV**
+This directory contains scripts and tools for measuring WSB file detection latency at different directory nesting depths. The research evaluates how filesystem depth impacts detection performance across realistic attack scenarios.
 
-Your research infrastructure is now ready. All experimental results will be saved in CSV format for analysis.
+## Scripts
 
----
+- wsb-hunter-instrumented.ps1 - Enhanced detector with millisecond-precision timestamps and CSV logging
+- generate-test-file.ps1 - Creates test .wsb files with configurable depth and risk levels
+- run-experiment.ps1 - Orchestrates test file generation across multiple depths
+- visualization.py - Python tools for analyzing and visualizing results
 
-## What You Have
+## CSV Output
 
-### Scripts Available
+Results are logged to: C:\WSB_Quarantine\performance.csv
 
-1. **wsb-hunter-instrumented.ps1**
-   - Enhanced detector with millisecond-precision timestamps
-   - Logs all detections to `C:\WSB_Quarantine\performance.csv`
-   - Configurable scan scope and depth
-   - CSV columns: Timestamp, EventType, FilePath, DetectionLatencyMs, QuarantineLatencyMs, AnalysisLatencyMs, TotalResponseTimeMs, RiskScore, Details
+### Format
 
-2. **generate-test-file.ps1**
-   - Creates test `.wsb` files with configurable:
-     - Directory depth (1-10 levels)
-     - Risk levels (empty, low, medium, high)
-     - Precise creation timestamps
-
-3. **run-experiment.ps1**
-   - Orchestrates test generation
-   - Runs test file generation across multiple depths
-   - Creates test files in isolated directory structures
-
-4. **visualization.py**
-   - Python visualization tools for analyzing results
-   - Generates charts from CSV data
-
----
-
-## CSV Output Details
-
-### Location
-`C:\WSB_Quarantine\performance.csv`
-
-### Format (9 columns)
-```
 Timestamp (datetime)
 EventType (string: FileQuarantined / FileQuarantineFailed)
 FilePath (string: full path)
-DetectionLatencyMs (integer) ← PRIMARY METRIC
+DetectionLatencyMs (integer) <- PRIMARY METRIC
 QuarantineLatencyMs (integer)
 AnalysisLatencyMs (integer)
 TotalResponseTimeMs (integer)
 RiskScore (integer: 0-135+)
 Details (string: analysis findings)
-```
 
-### Example Rows
-```csv
+### Example Output
+
 Timestamp,EventType,FilePath,DetectionLatencyMs,QuarantineLatencyMs,AnalysisLatencyMs,TotalResponseTimeMs,RiskScore,Details
 2025-11-29 12:00:01.234,FileQuarantined,C:\Users\user\Downloads\test-1.wsb,142,48,67,257,0,
 2025-11-29 12:00:02.456,FileQuarantined,C:\Users\user\Downloads\level2\level3\test-2.wsb,387,52,89,528,20,Networking enabled (+20)
-```
 
-### Ready for Analysis
-- ✅ Excel: Open directly, create charts
-- ✅ Python: `pd.read_csv()`, statistical analysis
-- ✅ R: `read.csv()`, ggplot2 visualizations
-- ✅ PowerBI: Direct import for dashboards
+## Running Experiments
 
----
+Experiments are organized by directory depth to simulate different attack scenarios.
 
-## Has Testing Been Run?
+### Depth 1 - Shallow (Obvious Locations)
 
-**No, not yet.** The scripts are created but you need to execute them. Here's what to do:
+Files placed in commonly accessed directories:
+- C:\Users\<user>\Downloads
+- C:\Users\<user>\Desktop
+- C:\Windows\Temp
 
-### Run Tests Now (3 simple steps per depth)
-
-**For EACH depth (1, 3, 5):**
-
-**Terminal 1 - Detector** (Keep running)
-```powershell
+Terminal 1:
+\\\powershell
 cd C:\Users\itsam\OneDrive\Documents\GitHub\DigitalForensic-G31\wsb latency testing
 powershell -ExecutionPolicy Bypass -File .\wsb-hunter-instrumented.ps1 -ScanScope Shallow -ScanDepth 1
-```
+\\\
 
-**Terminal 2 - Test Generator** (After 5 seconds)
-```powershell
+Terminal 2 (after detector reports "Real-time monitoring active"):
+\\\powershell
 cd C:\Users\itsam\OneDrive\Documents\GitHub\DigitalForensic-G31\wsb latency testing
-powershell -ExecutionPolicy Bypass -File .\run-experiment.ps1 -TestDepth 1
-```
+powershell -ExecutionPolicy Bypass -File .\run-experiment.ps1 -TestDepth 1 -TrialsPerConfig 100
+\\\
 
-**Then repeat with -ScanScope Medium -ScanDepth 3 and -ScanScope Deep -ScanDepth 5**
+### Depth 3 - Medium (User Directory Nesting)
 
----
+Files hidden in nested user directories:
+- C:\Users\<user>\AppData\Local\Temp
+- C:\Users\<user>\Documents\Work
+- C:\Users\<user>\Downloads\Archive
 
-## Expected Outcomes
+Terminal 1:
+\\\powershell
+powershell -ExecutionPolicy Bypass -File .\wsb-hunter-instrumented.ps1 -ScanScope Medium -ScanDepth 3
+\\\
 
-After running:
+Terminal 2:
+\\\powershell
+powershell -ExecutionPolicy Bypass -File .\run-experiment.ps1 -TestDepth 3 -TrialsPerConfig 100
+\\\
 
-### Files Created
-1. `C:\WSB_Quarantine\performance.csv` - Raw data (150+ rows)
-2. `C:\Research\WSB-Hunter-Latency\analysis\summary-report.txt` - Statistics
-3. `C:\Research\WSB-Hunter-Latency\analysis\performance-analysis.csv` - Formatted for charting
+### Depth 5 - Deep (System Directory Nesting)
 
-### Metrics You'll Get
-- **Mean Detection Latency**: e.g., 245ms
-- **Standard Deviation**: e.g., ±67ms
-- **Min/Max Range**: e.g., 89ms - 512ms
-- **95% Confidence Interval**: e.g., 113ms - 377ms
-- **Risk Score Distribution**: How many scored 0, 20, 80, 135, etc.
+Files hidden in deeply nested system paths:
+- C:\ProgramData\Microsoft\Windows\Caches\Temp\Work
+- C:\Windows\Temp\System\Cache\Data
+- C:\Users\<user>\AppData\Local\Microsoft\Edge\Cache\Storage
 
-### For Your Paper
-- Tables of statistics
-- Graphs showing depth impact
-- Latency component breakdown
-- Risk score accuracy verification
+Terminal 1:
+\\\powershell
+powershell -ExecutionPolicy Bypass -File .\wsb-hunter-instrumented.ps1 -ScanScope Deep -ScanDepth 5
+\\\
 
----
+Terminal 2:
+\\\powershell
+powershell -ExecutionPolicy Bypass -File .\run-experiment.ps1 -TestDepth 5 -TrialsPerConfig 100
+\\\
 
-## Configuration Details
+## Test Configuration
 
-### Test Configurations
+| Depth | Scenario | Example Locations | Test Files |
+|-------|----------|-------------------|-----------|
+| 1 | Shallow | Downloads, Desktop, Temp | 100 total (3 dirs) |
+| 3 | Medium | AppData\Temp, Documents, Downloads\Archive | 100 total (3 dirs) |
+| 5 | Deep | ProgramData paths, Windows\Temp, Edge\Cache | 100 total (3 dirs) |
 
-3 isolated depth tests × 30 trials each:
+Total: 300 test files across realistic attack locations
 
-| Name | Description | Depth | Directory |
-|------|-------------|-------|-----------|
-| Default_Depth1 | Shallow baseline | 1 | Downloads root |
-| Default_Depth3 | Medium nesting | 3 | Downloads/level2/level3 |
-| Default_Depth5 | Deep nesting | 5 | Downloads/level2/level3/level4/level5 |
+## Analysis
 
-### Threat Model
-- Realistic: Attackers use non-admin paths
-- Obfuscation: Nested directory structures
-- Staging: %TEMP% and Public folders
+### Primary Metric
 
----
+Detection Latency (ms) - Time elapsed from file creation to detection by the scanner.
 
-## CSV Analysis Quick Examples
+File Created at T=0ms
 
-### Python: Basic Statistics
-```python
+Detector polls filesystem
+
+DetectionLatencyMs = Time elapsed
+
+### Data Analysis
+
+The CSV output is ready for analysis in multiple tools:
+
+**Excel:**
+1. Open C:\WSB_Quarantine\performance.csv
+2. Create charts (Timestamp vs DetectionLatencyMs)
+3. Generate pivot tables by depth
+
+**Python:**
+\\\python
 import pandas as pd
-df = pd.read_csv('C:\\WSB_Quarantine\\performance.csv')
-
-# Get stats for all detections
+df = pd.read_csv('C:\\\\WSB_Quarantine\\\\performance.csv')
 print(df['DetectionLatencyMs'].describe())
 print(f"95th percentile: {df['DetectionLatencyMs'].quantile(0.95)}")
+\\\
 
-# By configuration (if you add config column)
-# grouped = df.groupby('Configuration')['DetectionLatencyMs'].describe()
-```
+**R:**
+\\\
+df <- read.csv('C:\\\\WSB_Quarantine\\\\performance.csv')
+boxplot(df\, main="Detection Latency Distribution")
+\\\
 
-### Excel: Create Chart
-1. Select columns A (Timestamp) and D (DetectionLatencyMs)
-2. Insert → Line Chart
-3. Title: "Detection Latency Over Time"
+## Output Files
 
-### R: Visualization
-```r
-df <- read.csv('C:\\WSB_Quarantine\\performance.csv')
-boxplot(df$DetectionLatencyMs, main="Detection Latency Distribution")
-```
+After running experiments, the following files are generated:
 
----
-
-## Next Steps
-
-1. **✅ Done**: Infrastructure created
-2. **→ NOW**: Run experiments for each depth (Depth 1, 3, 5)
-3. **→ ANALYZE**: Compare DetectionLatencyMs across depths in CSV
-4. **→ VISUALIZE**: Create charts from CSV data
-5. **→ DOCUMENT**: Add findings to research paper
-
----
-
-## Questions?
-
-Refer to:
-- **Quick Start**: `QUICKSTART.md`
-- **Script Help**: Read comments in each `.ps1` file
-
-**Ready to collect your first data! 🚀**
+- C:\WSB_Quarantine\performance.csv - Raw detection data (300+ rows)
