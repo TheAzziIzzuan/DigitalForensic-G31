@@ -64,7 +64,7 @@ After running and waiting for a short while, you will encounter this:
 - `[Q] Quarantine it`
 - `[D] Delete immediately`
 
-If you so happen to have your own, other .wsb files on your system that are identified, their risk analysis may pop up first before harmless.wsb's risk analysis, as identified .wsb files appear one by one. Just input 'A' to leave these .wsb files alone
+If you so happen to have your own, other .wsb files on your file system that are identified, their risk analysis may pop up first before harmless.wsb's risk analysis, as identified .wsb files appear one by one. Just input 'A' to leave these .wsb files alone
 
 The user can choose one of three options, depending on what letter they input:
 - A: Leave the .wsb as is. If they know for a fact it is harmless, for example
@@ -73,12 +73,12 @@ The user can choose one of three options, depending on what letter they input:
 
 
 ### Real-time detection
-The hunter is also capable of detecting .wsb files that are newly introduced while it is running. You can try this by creating a new .wsb file while it is running on a second Powershell terminal, like so:
+The hunter is also capable of detecting .wsb files that are newly introduced while it is running. You can try this by creating a new .wsb file while it is running, using a second Powershell terminal:
 ```powershell
 echo "<Configuration></Configuration>" > C:\Users\$env:USERPROFILE\Downloads\harmless2.wsb
 ```
 
-After a short while, you should reencounter the same analysis result as above.
+After a short while, another analysis result similar to the previous one will pop up.
 
 
 ### Risk-level capability
