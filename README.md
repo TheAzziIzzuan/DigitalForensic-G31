@@ -23,7 +23,7 @@ All functionality is contained in a single script: `sandevistan.ps1`.
 
 ---
 # USER MANUAL 
-- Upon downloading this repository, navigate the folder that contains wsb-hunter.ps1 to execute the following commands
+- Upon downloading this repository, navigate to the folder that contains wsb-hunter.ps1 to execute the following commands
   
 ## Basic Usage
 All commands follow this format:
